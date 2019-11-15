@@ -61,7 +61,7 @@ class CSVWriter:
         for r in records:
             cat = r.get_category()
             if cat not in categories:
-                categories[cat] = tpfp_tracker()
+                categories[cat] = CSVWriter.tpfp_tracker()
             categories[cat].add_record(r)
         
         for r in records:
@@ -74,7 +74,7 @@ class CSVWriter:
         """
         Adds precision and recall for the entire dataset.
         """
-        tracker = tpfp_tracker()
+        tracker = CSVWriter.tpfp_tracker()
         for r in records:
             tracker.add_record(r)
 
