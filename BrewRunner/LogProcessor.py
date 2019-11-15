@@ -11,7 +11,7 @@ class LogProcessor:
         """
         Accepts the raw input from BREW and returns a list of records.
         """
-        delimit_line = ""
+        delimit_line = "--BEGIN RUN--"
         
         records = list()
         raw_record = list()
