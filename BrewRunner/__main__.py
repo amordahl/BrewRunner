@@ -12,3 +12,6 @@ num_jobs = 1
 def main():
     records = Runner.run_all_instances(args.configs, num_jobs)
     CSVWriter.write_to_csv(records)
+
+if __name__ == "__main__":
+    main()
