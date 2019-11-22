@@ -1,6 +1,10 @@
 import csv
 import os
+import statistics
 from BrewRunner.Record import Record
+import logging
+logging.basicConfig(level=logging.DEBUG)
+from decimal import *
 
 class CSVWriter:
     """
@@ -12,6 +16,7 @@ class CSVWriter:
         """
         Computes precisions and then writes to a csv.
         """
+        records = [r.as_dict() for r in records]
         CSVWriter.add_category_stats(records)
         CSVWriter.add_full_stats(records)
 
@@ -22,8 +27,7 @@ class CSVWriter:
 
             if not csv_exists:
                 writer.writeheader()
-            for r in records:
-                writer.writerow(r.as_dict())
+            writer.writerows(records)
         
 
     class tpfp_tracker:
@@ -33,51 +37,70 @@ class CSVWriter:
             self.tn = 0
             self.fn = 0
 
-        def add_record(self, record: Record):
-            successful = record.get_was_successful()
-            was_tp = record.get_is_true_positive()
+        def add_record(self, record):
+            successful = record['successful']
+            was_tp = record['true_positive']
             if successful and was_tp:
                 self.tp += 1
             elif successful and not was_tp:
-                self.fp += 1
+                self.tn += 1
             elif not successful and was_tp:
                 self.fn += 1
             elif not successful and not was_tp:
-                self.tn += 1
+                self.fp += 1
 
         def get_precision(self):
-            return self.tp / float(self.tp + self.fp)
-
+            try:
+                logging.debug("Precision: " + str(self.tp) + "/(" +
+                              str(self.tp) + "+" + str(self.fp) + ")")
+                p = Decimal(self.tp) / Decimal(self.tp + self.fp)
+            except:
+                p = 0
+            return float(p)
+        
         def get_recall(self):
-            return self.tp / float(self.tp + self.fn)
+            try:
+                r = Decimal(self.tp) / Decimal(self.tp + self.fn)
+            except:
+                r = 0
+            return float(r)
             
     @staticmethod
     def add_category_stats(records):
         """
-        Adds precisions and recalls for each category.
+        Adds precision, recalls, and f-measures for each category.
         """
         categories = dict()
         
         for r in records:
-            cat = r.get_category()
+            cat = r["category"]
             if cat not in categories:
                 categories[cat] = CSVWriter.tpfp_tracker()
             categories[cat].add_record(r)
         
         for r in records:
-            cat = r.get_category
-            r["category_precision"] = categories[cat].get_precision()
-            r["category_recall"] = categories[cat].get_recall()
+            cat = r["category"]
+            logging.debug("For cat " + cat + ", tp:" + str(categories[cat].tp) +
+                          " fp:" + str(categories[cat].fp) + " tn:" + str(categories[cat].tn) +
+                          " fn:" + str(categories[cat].fn))
+            prec = categories[cat].get_precision()
+            r["category_precision"] = prec
+            recall = categories[cat].get_recall()
+            r["category_recall"] = recall
+            r["category_fmeasure"] = statistics.harmonic_mean([prec, recall])
 
     @staticmethod
     def add_full_stats(records):
         """
-        Adds precision and recall for the entire dataset.
+        Adds precision, recall, and f measure for the entire dataset.
         """
         tracker = CSVWriter.tpfp_tracker()
         for r in records:
             tracker.add_record(r)
 
         for r in records:
-            r["run_precision"] = tracker.get_precision()
-            r["run_recall"] = tracker.get_recall()
+            prec = tracker.get_precision()
+            r["run_precision"] = prec
+            recall = tracker.get_recall()
+            r["run_recall"] = recall
+            r["run_fmeasure"] = statistics.harmonic_mean([prec, recall])
