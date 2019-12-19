@@ -1,6 +1,6 @@
 from BrewRunner.Record import Record
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 class LogProcessor:
     """
     Class that processes a BREW log and transforms it into
@@ -17,15 +17,12 @@ class LogProcessor:
         records = list()
         raw_record = ""
         for l in raw_in.splitlines():
-            print("line: " + l)
             if l == delimit_line:
                 # if record is not empty then add
                 #  it to the list and clear the record
                 if len(raw_record) > 0:
-                    logging.debug("Converting to record: " + raw_record)
                     try:
                         r = Record(raw_record)
-                        logging.debug("Record: " + str(r.as_dict()))
                         records.append(r)
                     except AttributeError as ae:
                         logging.warning("Record " + raw_record + " could"

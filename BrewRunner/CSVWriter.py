@@ -23,11 +23,13 @@ class CSVWriter:
         csv_exists = os.path.exists(output_file)
         
         with open(output_file, 'a') as csvfile:
+            logging.info(f"Writing to {output_file}")
             writer = csv.DictWriter(csvfile, fieldnames=records[0].keys())
 
             if not csv_exists:
                 writer.writeheader()
             writer.writerows(records)
+        logging.info(f"Writing concluded.")
         
 
     class tpfp_tracker:
