@@ -45,6 +45,7 @@ class Record:
         return apk
 
     def set_generating_script(self, gs):
+        logging.debug(f"generating script: {gs}")
         self.generating_script = gs
         
     def set_category(self, parent_dir):

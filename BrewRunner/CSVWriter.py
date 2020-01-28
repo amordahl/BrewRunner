@@ -82,9 +82,6 @@ class CSVWriter:
         
         for r in records:
             cat = r["category"]
-            logging.debug("For cat " + cat + ", tp:" + str(categories[cat].tp) +
-                          " fp:" + str(categories[cat].fp) + " tn:" + str(categories[cat].tn) +
-                          " fn:" + str(categories[cat].fn))
             prec = categories[cat].get_precision()
             r["category_precision"] = prec
             recall = categories[cat].get_recall()

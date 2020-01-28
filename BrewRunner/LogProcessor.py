@@ -31,5 +31,5 @@ class LogProcessor:
                     raw_record = ""
             else:
                 raw_record = raw_record + l
-
+        logging.info(f'parsed {len(records)} records')
         return records
