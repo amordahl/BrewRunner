@@ -1,4 +1,5 @@
 import csv
+import math
 import os
 import statistics
 from BrewRunner.Record import Record
@@ -99,7 +100,11 @@ class CSVWriter:
 
         for r in records:
             prec = tracker.get_precision()
+            if (math.isclose(prec, 0.0)):
+                logging.warning("Precision is 0! You might want to check this out.")
             r["run_precision"] = prec
             recall = tracker.get_recall()
+            if (math.isclose(recall, 0.0)):
+                logging.warning("Recall is 0! You might want to check this out.")
             r["run_recall"] = recall
             r["run_fmeasure"] = statistics.harmonic_mean([prec, recall])

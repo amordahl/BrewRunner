@@ -1,6 +1,6 @@
 from BrewRunner.Record import Record
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 class LogProcessor:
     """
     Class that processes a BREW log and transforms it into
@@ -16,6 +16,7 @@ class LogProcessor:
         
         records = list()
         raw_record = ""
+        logging.debug(f'Parsing {raw_in.splitlines()}')
         for l in raw_in.splitlines():
             if l == delimit_line:
                 # if record is not empty then add
@@ -31,5 +32,11 @@ class LogProcessor:
                     raw_record = ""
             else:
                 raw_record = raw_record + l
+        # Catch last record
+        try:
+            r = Record(raw_record)
+            records.append(r)
+        except AttributeError as ae:
+            logging.warning(f'Could not convert final record {raw_record}')
         logging.info(f'parsed {len(records)} records')
         return records

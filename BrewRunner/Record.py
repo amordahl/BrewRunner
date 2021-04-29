@@ -18,12 +18,23 @@ class Record:
         """
         Inits based off the raw record given.
         """
+        logging.debug(f'Creating record based off of AQL text: {record}')
         self.record = record
         self.generating_script = None
         self.is_true_positive = self.get_is_true_positive()
         self.category = None
         self.apk = self.get_apk()
         self.successful = self.get_was_successful()
+        self.time = self.get_time()
+        logging.debug('Record creation complete.')
+
+    def get_time(self):
+        """
+        Extracts the time the record reported
+        """
+        m = re.search(r"EXECUTION_TIME=(\d+)", self.record)
+        result = m.group(1)
+        return int(result)
 
     def get_is_true_positive(self):
         """
@@ -45,7 +56,6 @@ class Record:
         return apk
 
     def set_generating_script(self, gs):
-        logging.debug(f"generating script: {gs}")
         self.generating_script = gs
         
     def set_category(self, parent_dir):
@@ -56,13 +66,13 @@ class Record:
 
         # Keep reducing the apk name until we get to the parent;
         #  its child is the category.
-        parent = self.apk
-        child = ""
-        while not parent.endswith(parent_dir):
-            child = os.path.basename(parent)
-            parent = os.path.dirname(parent)
-
-        self.category = child
+        if not parent_dir.endswith('/'):
+            parent_dir = f'{parent_dir}/'
+        if not self.apk.startswith(parent_dir):
+            logging.critical(f'Could not determine category of apk. Supplied category directory is {parent_dir}. APK is located in {self.apk}.')
+        else:
+            self.category = self.apk[len(parent_dir):].split('/')[0]
+            logging.info(f'Category is {self.category}')
     
     def get_category(self):
         """
@@ -91,5 +101,6 @@ class Record:
         out['generating_script'] = self.generating_script
         out['true_positive'] = self.is_true_positive
         out['successful'] = self.successful
+        out['time'] = self.time
         return out
         
